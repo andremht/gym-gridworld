@@ -7,6 +7,7 @@ The GridWorld adapts the FrozenLake environment to replicate the minimalistic Gr
 # Installation
 
 ```bash
+git clone https://github.com/andremht/gym-gridworld.git
 cd gym-gridworld
 pip install -e .
 ```

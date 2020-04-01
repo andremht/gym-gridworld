@@ -32,6 +32,13 @@ MAPS = {
         "FWF",
         "SWG"
     ],
+    "5x5_AB": [
+        "FAFBF",
+        "FFFFF",
+        "FFFbF",
+        "FFFFF",
+        "FaFFF"
+    ],
     "8x8": [
         "SFFFFFFF",
         "FFFFFFFF",
@@ -119,7 +126,11 @@ class GridWorldEnv(discrete.DiscreteEnv):
         nS = nrow * ncol
 
         isd = np.array(desc == b'S').astype('float64').ravel()
-        isd /= isd.sum()
+        if isd.sum() > 0:
+            isd /= isd.sum()
+        else:
+            isd = np.array(desc == b'F').astype('float64').ravel()
+            isd /= isd.sum()
 
         P = {s : {a : [] for a in range(nA)} for s in range(nS)}
 
@@ -137,13 +148,42 @@ class GridWorldEnv(discrete.DiscreteEnv):
                 row = max(row-1,0)
             return (row, col)
 
+        if map_name == "5x5_AB":
+            state_a = np.array(desc == b'a').astype('float64').ravel()
+            state_a = np.where(state_a == 1.0)
+            state_a = state_a[0][0]
+            state_b = np.array(desc == b'b').astype('float64').ravel()
+            state_b = np.where(state_b == 1.0)
+            state_b = state_b[0][0]
+#            print(state_a[0][0])
         for row in range(nrow):
             for col in range(ncol):
                 s = to_s(row, col)
                 for a in range(4):
                     li = P[s][a]
                     letter = desc[row, col]
-                    if letter in b'GH':
+                    if map_name == "5x5_AB":
+                        newrow, newcol = inc(row, col, a)
+                        newstate = to_s(newrow, newcol)
+                        newletter = desc[newrow, newcol]
+                        done = bytes(newletter) in b'G'
+                        if newletter not in b'AB' and newstate == s:
+                            rew = -1.0
+                        else:
+                            if newletter in b'W':
+	                            newstate=s
+	                            rew = -1.0 
+                            if letter in b'A':
+                                rew = 10.0
+                                newstate = state_a
+                            elif letter in b'B':
+                                rew = 5.0
+                                newstate = state_b
+                            else:
+                                rew = 0.0
+                        li.append((1.0, newstate, rew, done))
+#
+                    elif letter in b'GH':
                         li.append((1.0, s, 0, True))  #terminal state
                     else:
                         if is_slippery:

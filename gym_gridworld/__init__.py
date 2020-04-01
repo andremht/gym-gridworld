@@ -28,6 +28,15 @@ register(
     reward_threshold=1.0,
 )
 
+register(
+    id='GridWorld-5x5-AB-v0',
+    entry_point='gym_gridworld.envs:GridWorldEnv',
+    kwargs={'map_name' : '5x5_AB', 
+    'is_slippery' : False},
+    max_episode_steps=200,
+    reward_threshold=1.0,
+)
+
 # register(
 #     id='GridWorld-v0',
 #     entry_point='gym.envs.toy_text:FrozenLakeEnv',
